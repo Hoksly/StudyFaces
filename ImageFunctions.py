@@ -44,8 +44,8 @@ def take_gender_and_age(IMAGE):
     hasFrame, frame = video.read()
     resultImg, faceBoxes = __highlightface(faceNet, frame)
     if not faceBoxes:
-        print("No face detected")
-        return None
+        print("No face detected:", IMAGE)
+        return None, None
 
     for faceBox in faceBoxes[0:1]:
         face = frame[max(0, faceBox[1] - padding):
@@ -63,9 +63,6 @@ def take_gender_and_age(IMAGE):
         age = ageList[agePreds[0].argmax()]
         #print(f'Age: {age[1:-1]} years')
 
-        cv2.putText(resultImg, f'{gender}, {age}', (faceBox[0], faceBox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
-                    (0, 255, 255), 2, cv2.LINE_AA)
-        cv2.imshow("Detecting age and gender", resultImg)
 
         return gender, age[1:-1]
 

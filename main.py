@@ -52,20 +52,23 @@ def take_text_data_from_file(filename):
     return data
 
 
-def take_photos_and_their_names_from_directory(folder):
+def take_photos_and_their_names_from_directory(folder, image_size = (250, 250)):
     """
 
+    :param image_size: size in which photo will be shown in GUI
     :param folder: folder in which are target photos
     :return: dictionary type:  photo_name: pygame_photo_object
 
     Ideas to improvement:
     1) Some photos can have same name. This situation is needed to be fixed.
+    2) Critical! Image needs to be scaled! *Solved*
     """
 
     photos_and_names = {}
     for photo in os.listdir(folder):
         name = photo[0:photo.rindex('.')]
         pygame_photo = pygame.image.load(folder + sep + photo)
+        pygame_photo = pygame.transform.scale(pygame_photo, image_size )
 
         photos_and_names.update({name:pygame_photo})
 
@@ -106,6 +109,7 @@ def put_some_photos_in_folder(folder_name, n, target_age= 0, target_gender= 0):
                 os.remove(filename)
             else:
                 n -= 1
+
 
 def give_names_to_photos_in_folder(folder, difficult='hard', language='russian', mode='all'):
     """
@@ -171,6 +175,7 @@ def generate_new_set(set_name, n, mode= 'new', difficult = 'hard', language= 'ru
                                    difficult=difficult)
 
     return None
+
 
 
 class Menu:

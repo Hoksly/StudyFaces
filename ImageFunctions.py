@@ -117,7 +117,7 @@ def take_text_data_from_file(filename):
     return data
 
 
-def take_photos_and_their_names_from_directory(folder, image_size=(250, 250)):
+def take_photos_and_their_names_from_directory(folder, image_size=(200, 200)):
     """
 
     :param image_size: size in which photo will be shown in GUI

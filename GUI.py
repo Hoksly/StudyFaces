@@ -1,10 +1,13 @@
 import tkinter as tk
 import pygame
-
+import os
+pygame.init()
 sep = '/'
 data_folder = 'data' + sep + 'GUI' + sep
 
 window = pygame.display.set_mode((600, 400))
+
+
 
 '''
 class MainWindow:
@@ -104,8 +107,62 @@ class StartWindow:
         self.exit_icon.draw()
 
 
+class MainWindow:
+    def __init__(self, persons_list, bg_image = data_folder + 'background.png'):
+        self.background = pygame.image.load(bg_image)
+
+        self.user_text = ''
+        self.persons_list = persons_list
+
+        self.score = 0
+        self.input_rect = pygame.Rect(350, 200, 140, 32)
+        self.current_person = 0
+        self.image = self.persons_list[self.current_person].image
+        # debug print
+        # p
+        # rint(os.getcwd() + sep + data_folder + 'ChelseaMarket-Regular.ttf')
+
+        self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
+
+    def update_input(self, event):
+        if event.type == pygame.KEYDOWN:
+
+            # Check for backspace
+            if event.key == pygame.K_BACKSPACE:
+
+                # get text input from 0 to -1 i.e. end.
+                self.user_text = self.user_text[:-1]
+
+            elif event.key == pygame.K_RETURN:
+                if self.persons_list[self.current_person].compare_names(self.user_text):
+                    self.score += 1
+
+                if self.current_person < len(self.persons_list) - 1:
+                    self.current_person += 1
+                    self.image = self.persons_list[self.current_person].image
+
+                    return 'In game', self.score
+
+                return 'Finish', self.score
+
+            else:
+                self.user_text += event.unicode
+
+    def draw(self):
+        window.blit(self.background, (0, 0))
+
+        pygame.draw.rect(window, pygame.Color('lightblue'), self.input_rect)
+        text_surface = self.font.render(self.user_text, True, (255, 255, 255))
+        window.blit(text_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
+
+        self.input_rect.w = max(100, text_surface.get_width() + 10)
+
+        self.persons_list[self.current_person].draw(100, 100)
+
+
 if __name__ == '__main__':
     run = True
+    Window = MainWindow([Person(pygame.transform.scale(pygame.image.load('data/Persons/Test_set/Герман_Болдырев.jpeg'), (200, 200)), 'GG')])
 
     while run:
         pygame.time.delay(1000 // 30)
@@ -113,4 +170,6 @@ if __name__ == '__main__':
             if el.type == pygame.QUIT:
                 run = False
 
-        draw()
+        Window.draw()
+
+        pygame.display.update()

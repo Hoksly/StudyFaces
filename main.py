@@ -36,7 +36,10 @@ if __name__ == '__main__':
         for el in pygame.event.get():
             if el.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = el.pos
-                mode = W.collidepoint(mouse_pos)
+                if mode == 'Main':
+                    mode = W.collidepoint(mouse_pos)
+            if mode == 'Start':
+                Main.update_input(el)
 
             if el.type == pygame.QUIT or mode == 'Exit':
                 run = False

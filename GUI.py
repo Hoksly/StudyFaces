@@ -134,12 +134,16 @@ class MainWindow:
                 self.user_text = self.user_text[:-1]
 
             elif event.key == pygame.K_RETURN:
-                if self.persons_list[self.current_person].compare_names(self.user_text):
+                if self.persons_list[self.current_person].compare_name(self.user_text):
                     self.score += 1
+
+                self.user_text = ''
 
                 if self.current_person < len(self.persons_list) - 1:
                     self.current_person += 1
                     self.image = self.persons_list[self.current_person].image
+
+
 
                     return 'In game', self.score
 
@@ -169,6 +173,7 @@ if __name__ == '__main__':
         for el in pygame.event.get():
             if el.type == pygame.QUIT:
                 run = False
+            Window.update_input(el)
 
         Window.draw()
 

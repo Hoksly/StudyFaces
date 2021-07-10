@@ -44,13 +44,21 @@ class Person:
         """
 
         self.image = image
-        self.name = name
 
-    def compare_name(self, input_name):
-        """ Needs to be upgraded"""
+        if '_' in name:
+            self.name = name.split('_')
+        elif ' ' in name:
+            self.name = name.split()
+        else:
+            assert ValueError("Error with file {}, it must contain '_' or ' ' separator between name and second name"
+                              " ".format(name))
 
-        if self.name == input_name:
-            return True
+    def compare_name(self, input_name: str):
+        # print(self.name, input_name.split(), self.name == input_name.split())
+        return self.name == input_name.split()
+
+    def get_name(self):
+        return ' '.join(self.name)
 
     def draw(self, x, y):
         window.blit(self.image, (x, y))
@@ -112,14 +120,19 @@ class MainWindow:
         self.background = pygame.image.load(bg_image)
 
         self.user_text = ''
+        self.printed_text = ''
         self.persons_list = persons_list
 
         self.score = 0
         self.input_rect = pygame.Rect(350, 200, 140, 32)
         self.current_person = 0
+        self.last_person = len(self.persons_list)
         self.image = self.persons_list[self.current_person].image
         self.m_mode = 0
         self.was_answer_right = True
+
+        self.failed = []
+
         # debug print
         # print(os.getcwd() + sep + data_folder + 'ChelseaMarket-Regular.ttf')
 
@@ -132,56 +145,89 @@ class MainWindow:
             if event.key == pygame.K_BACKSPACE:
 
                 # get text input from 0 to -1 i.e. end.
+                self.printed_text = self.printed_text[:-1]
                 self.user_text = self.user_text[:-1]
 
             elif event.key == pygame.K_RETURN:
+
                 self.m_mode += 1
                 if self.persons_list[self.current_person].compare_name(self.user_text):
                     self.score += 1
                     self.was_answer_right = True
+                    self.m_mode += 1
+
+                elif self.m_mode % 2 == 0:
+                    self.failed.append(self.persons_list[self.current_person].get_name())
 
                 self.was_answer_right = False
 
-                self.user_text = self.persons_list[self.current_person].name
+                self.printed_text = self.persons_list[self.current_person].get_name()
 
                 if self.m_mode % 2 == 0:
                     if self.current_person < len(self.persons_list) - 1:
                         self.current_person += 1
                         self.image = self.persons_list[self.current_person].image
                         self.user_text = ''
+                        self.printed_text = ''
                         self.was_answer_right = True
 
-                        return '', self.score
 
-                    return 'Finish', self.score
+                    else:
+                        print('here')
+                        return 'Finish'
 
             else:
                 self.user_text += event.unicode
+                self.printed_text += event.unicode
+
+        return 'Start'
+
 
     def draw(self):
         window.blit(self.background, (0, 0))
 
         pygame.draw.rect(window, pygame.Color('lightblue'), self.input_rect)
-        text_surface = self.font.render(self.user_text, True, (255, 255, 255)if self.was_answer_right else (255, 0, 0))
+        text_surface = self.font.render(self.printed_text, True, (255, 255, 255)if self.was_answer_right else (255, 0, 0))
         window.blit(text_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
 
         self.input_rect.w = max(100, text_surface.get_width() + 10)
 
         self.persons_list[self.current_person].draw(100, 100)
 
+    def return_data(self):
+        return self.score, self.last_person, self.failed
+
 
 class FinalScreen:
-    def __init__(self, score, all_score, failed, bg_image = data_folder + 'background.png'):
+    def __init__(self,  bg_image = data_folder + 'background.png'):
         """
 
         :param score: final score, int
         :param failed: failed answers (names), list
         """
-        self.score = score
-        self.failed_answers = failed
+        self.score = None
+        self.failed_answers = None
+        self.all_score = None
+
+        self.created = True
         self.background = pygame.image.load(bg_image)
         self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
+
+    def update_data(self, score, all_score, failed):
+        """
+        Need to be initialize a bit later
+        :param score: int
+        :param all_score: int
+        :param failed: list
+        :return:
+        """
+        self.score = score
+        self.failed_answers = failed
         self.all_score = all_score
+        self.created = False
+
+    def get_status(self):
+        return self.created
 
     def draw(self):
         window.blit(self.background, (0, 0))

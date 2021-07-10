@@ -1,5 +1,5 @@
 from ImageFunctions import generate_new_set, take_photos_and_their_names_from_directory
-from GUI import Person, StartWindow, MainWindow
+from GUI import Person, StartWindow, MainWindow, FinalScreen
 from GUIFunctions import give_folder_name
 import pygame
 pygame.init()
@@ -24,6 +24,7 @@ def create_persons_list(folder):
 
 
 Main = MainWindow(create_persons_list('data/Persons/Test_set'))
+Final_Score_Screen = FinalScreen()
 run = True
 mode = 'Main'
 
@@ -39,18 +40,24 @@ if __name__ == '__main__':
                 if mode == 'Main':
                     mode = W.collidepoint(mouse_pos)
             if mode == 'Start':
-                Main.update_input(el)
+                mode = Main.update_input(el)
 
             if el.type == pygame.QUIT or mode == 'Exit':
                 run = False
         if mode == "Main":
             W.draw()
 
-        if mode == 'Start':
+        elif mode == 'Start':
             Main.draw()
 
-        if mode == 'Settings':
+        elif mode == 'Settings':
             pass # Switch to settings
+        elif mode == 'Finish':
+            if Final_Score_Screen.get_status():
+                score, all_score, failed = Main.return_data()
+                Final_Score_Screen.update_data(score, all_score, failed)
+            else:
+                Final_Score_Screen.draw()
 
         pygame.display.update()
 

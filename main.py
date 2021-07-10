@@ -1,11 +1,11 @@
 from ImageFunctions import generate_new_set, take_photos_and_their_names_from_directory
-from GUI import Person, StartWindow, MainWindow, FinalScreen, MiddleScreen
+from GUI import Person, StartWindow, MainWindow, FinalScreen, MiddleScreen, ChooseSetScreen
 from GUIFunctions import give_folder_name
 import pygame
 pygame.init()
 
 window = pygame.display.set_mode((600, 400))
-W = StartWindow()
+
 
 
 def create_persons_list(folder):
@@ -23,9 +23,11 @@ def create_persons_list(folder):
     return persons_list
 
 
-Main = MainWindow(create_persons_list('data/Persons/Test_set'))
+Main = None
+W = StartWindow()
 Final_Score_Screen = FinalScreen()
 MiddleScreen = MiddleScreen()
+Chose_Screen = ChooseSetScreen()
 run = True
 mode = 'Main'
 
@@ -33,7 +35,7 @@ if __name__ == '__main__':
     run = True
 
     while run:
-        print(mode)
+       # print(mode)
         pygame.time.delay(1000 // 30)
 
         for el in pygame.event.get():
@@ -45,6 +47,11 @@ if __name__ == '__main__':
                 elif mode == 'Start':
                     mode = MiddleScreen.clicks(el.pos)
 
+                elif mode == 'Chose Set':
+                    folder = Chose_Screen.clicks(el.pos)
+                    if folder != 'Chose Set':
+                        Main = MainWindow(create_persons_list('data/Persons/' + folder))
+                        mode = 'In Game'
 
             if mode == 'In game':
                 mode = Main.update_input(el)
@@ -57,8 +64,12 @@ if __name__ == '__main__':
 
         elif mode == 'Start':
             MiddleScreen.draw()
+
         elif mode == 'In Game':
             Main.draw()
+
+        elif mode == 'Chose Set':
+            Chose_Screen.draw()
 
         elif mode == 'Settings':
             pass # Switch to settings

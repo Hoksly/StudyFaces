@@ -1,3 +1,5 @@
+import os
+
 import pygame
 
 pygame.init()
@@ -5,8 +7,6 @@ sep = '/'
 data_folder = 'data' + sep + 'GUI' + sep
 
 window = pygame.display.set_mode((600, 400))
-
-
 
 '''
 class MainWindow:
@@ -63,7 +63,7 @@ class Person:
         window.blit(self.image, (x, y))
 
 
-def draw(current_person = 'Nothing'):
+def draw(current_person='Nothing'):
     window.blit(background, (0, 0))
     # current_person.draw()
 
@@ -86,7 +86,7 @@ class Icon:
 
 
 class StartWindow:
-    def __init__(self, bg_image = data_folder + 'background.png'):
+    def __init__(self, bg_image=data_folder + 'background.png'):
         self.background = pygame.image.load(bg_image)
         self.start_icon = Icon(200, 80 - 5, 200, 50, data_folder + 'start.png')
         self.settings_icon = Icon(200, 160 - 5, 200, 50, data_folder + "settings.png")
@@ -115,7 +115,7 @@ class StartWindow:
 
 
 class MainWindow:
-    def __init__(self, persons_list, bg_image = data_folder + 'background.png'):
+    def __init__(self, persons_list, bg_image=data_folder + 'background.png'):
         self.background = pygame.image.load(bg_image)
 
         self.user_text = ''
@@ -181,12 +181,12 @@ class MainWindow:
 
         return 'Start'
 
-
     def draw(self):
         window.blit(self.background, (0, 0))
 
         pygame.draw.rect(window, pygame.Color('lightblue'), self.input_rect)
-        text_surface = self.font.render(self.printed_text, True, (255, 255, 255)if self.was_answer_right else (255, 0, 0))
+        text_surface = self.font.render(self.printed_text, True,
+                                        (255, 255, 255) if self.was_answer_right else (255, 0, 0))
         window.blit(text_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
 
         self.input_rect.w = max(100, text_surface.get_width() + 10)
@@ -198,7 +198,7 @@ class MainWindow:
 
 
 class FinalScreen:
-    def __init__(self,  bg_image = data_folder + 'background.png'):
+    def __init__(self, bg_image=data_folder + 'background.png'):
         """
 
         :param score: final score, int
@@ -230,8 +230,9 @@ class FinalScreen:
 
     def draw(self):
         window.blit(self.background, (0, 0))
-        score_text = self.font.render('Your final score: ' + '{}/{}'.format(self.score, self.all_score), True, (255, 255, 255))
-        window.blit(score_text, (300 - score_text.get_width()/2, 100))
+        score_text = self.font.render('Your final score: ' + '{}/{}'.format(self.score, self.all_score), True,
+                                      (255, 255, 255))
+        window.blit(score_text, (300 - score_text.get_width() / 2, 100))
 
         failed_answers_text = []
 
@@ -243,7 +244,7 @@ class FinalScreen:
             failed_answers_text.append(self.font.render(answer, True, (255, 0, 0)))
 
         for text in failed_answers_text:
-            window.blit(text, (300 - text.get_width()/2, y))
+            window.blit(text, (300 - text.get_width() / 2, y))
             y += text.get_height()
 
 
@@ -255,6 +256,7 @@ class Object:
 
     def draw(self):
         window.blit(self.image, (self.x, self.y))
+
 
 '''
 class Text(Icon):
@@ -270,9 +272,10 @@ class Text(Icon):
 
 
 class Label:
-    def __init__(self, text, x, y, width = 200, height = 50):
+    def __init__(self, text, x, y, width=200, height=50, text_size=32):
         self.background = pygame.Rect((x, y), (width, height))
-        self.font = self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
+        self.font = self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', text_size)
+        self.input = text
         self.text = self._render_text(text)
         self.x = x
         self.y = y
@@ -293,21 +296,24 @@ class Label:
 
 
 class ClickAbleLabel(Label):
-    def __init__(self, x, y, text, func):
-        super().__init__(text, x, y)
+    def __init__(self, x, y, text, func, text_size=32, width=200, height=50):
+        super().__init__(text=text, x=x, y=y, text_size=text_size, width=width, height=height)
         self.click_function = func
 
     def click_on(self, point):
         if self._collidepoint(point):
-            return self.click_function()
+
+            if self.click_function:
+                return self.click_function()
+            else:
+                return self.input
 
 
 class Screen:
-    def __init__(self,  bg_image = data_folder + 'background.png'):
+    def __init__(self, bg_image=data_folder + 'background.png'):
         self.background = pygame.image.load(bg_image)
         self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
         self.objects = []
-
 
     def draw(self):
         window.blit(self.background, (0, 0))
@@ -316,9 +322,28 @@ class Screen:
             obj.draw()
 
 
-class ChooseSetScreen:
-    def __init__(self):
-        pass
+def give_folder_name(name):
+    return name
+
+
+class ChooseSetScreen(Screen):
+    def __init__(self, set_folder='data/Persons'):
+        super().__init__()
+        self.all_sets = os.listdir(set_folder)
+        self.mode = 'Chose Set'
+        x = 200
+        y = 0
+        for folder in self.all_sets:
+            self.objects.append(ClickAbleLabel(x, y, folder, None, 30, height=30))
+            y += 30
+
+    def clicks(self, point):
+        for obj in self.objects:
+            mode = obj.click_on(point)
+            if mode:
+                self.mode = mode
+
+        return self.mode
 
 
 class CreateNewSetScreen:
@@ -349,6 +374,7 @@ class MiddleScreen(Screen):
                 self.mode = mode
         return self.mode
 
+
 class CreateRandomSetScreen:
     def __init__(self):
         pass
@@ -359,14 +385,15 @@ if __name__ == '__main__':
     # Window = MainWindow([Person(pygame.transform.scale(pygame.image.load('data/Persons/Test_set/Герман_Болдырев.jpeg'), (200, 200)), 'GG')])
     # Window = FinalScreen()
     # Window.update_data(2, 16, ['gg', 'GG'])
-    Window = MiddleScreen()
+    # Window = MiddleScreen()
+    Window = ChooseSetScreen()
     while run:
         pygame.time.delay(1000 // 30)
         for el in pygame.event.get():
             if el.type == pygame.QUIT:
                 run = False
             if el.type == pygame.MOUSEBUTTONDOWN:
-                Window.clicks(el.pos)
+                print(Window.clicks(el.pos))
             # Window.update_input(el)
 
         Window.draw()

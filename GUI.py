@@ -179,7 +179,7 @@ class MainWindow:
                 self.user_text += event.unicode
                 self.printed_text += event.unicode
 
-        return 'Start'
+        return 'In Game'
 
     def draw(self):
         window.blit(self.background, (0, 0))

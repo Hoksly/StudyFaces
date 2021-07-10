@@ -35,7 +35,7 @@ if __name__ == '__main__':
     run = True
 
     while run:
-       # print(mode)
+        #print(mode)
         pygame.time.delay(1000 // 30)
 
         for el in pygame.event.get():
@@ -53,9 +53,8 @@ if __name__ == '__main__':
                         Main = MainWindow(create_persons_list('data/Persons/' + folder))
                         mode = 'In Game'
 
-            if mode == 'In game':
+            if mode == 'In Game':
                 mode = Main.update_input(el)
-
 
             if el.type == pygame.QUIT or mode == 'Exit':
                 run = False

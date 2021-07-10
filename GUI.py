@@ -1,6 +1,5 @@
-import tkinter as tk
 import pygame
-import os
+
 pygame.init()
 sep = '/'
 data_folder = 'data' + sep + 'GUI' + sep
@@ -248,15 +247,126 @@ class FinalScreen:
             y += text.get_height()
 
 
+class Object:
+    def __init__(self, image, x, y):
+        self.image = pygame.image.load(image)
+        self.x = x
+        self.y = y
+
+    def draw(self):
+        window.blit(self.image, (self.x, self.y))
+
+'''
+class Text(Icon):
+    def __init__(self, x, y, text, width=200, height=50):
+        self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
+        text_surface = self._render_text(text)
+
+        super(Text, self).__init__(x, y, width, height, text_surface)
+
+    def _render_text(self, text):
+        return self.font.render(text, True, (255, 255, 255))
+'''
+
+
+class Label:
+    def __init__(self, text, x, y, width = 200, height = 50):
+        self.background = pygame.Rect((x, y), (width, height))
+        self.font = self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
+        self.text = self._render_text(text)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+    def _render_text(self, text):
+        return self.font.render(text, True, (255, 255, 255))
+
+    def draw(self):
+        pygame.draw.rect(window, pygame.Color('lightblue'), self.background)
+        label_x = self.x + (self.width - self.text.get_width()) / 2
+        label_y = self.y + (self.height - self.text.get_height()) / 2
+        window.blit(self.text, (label_x, label_y))
+
+    def _collidepoint(self, point):
+        return pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(point)
+
+
+class ClickAbleLabel(Label):
+    def __init__(self, x, y, text, func):
+        super().__init__(text, x, y)
+        self.click_function = func
+
+    def click_on(self, point):
+        if self._collidepoint(point):
+            return self.click_function()
+
+
+class Screen:
+    def __init__(self,  bg_image = data_folder + 'background.png'):
+        self.background = pygame.image.load(bg_image)
+        self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
+        self.objects = []
+
+
+    def draw(self):
+        window.blit(self.background, (0, 0))
+
+        for obj in self.objects:
+            obj.draw()
+
+
+class ChooseSetScreen:
+    def __init__(self):
+        pass
+
+
+class CreateNewSetScreen:
+    def __init__(self):
+        pass
+
+
+# Functions for MiddleScreen class
+def go_to_chose_set():
+    return "Chose Set"
+
+
+def go_to_create_new_set():
+    return "Chose Set"
+
+
+class MiddleScreen(Screen):
+    def __init__(self):
+        super().__init__()
+        self.objects.append(ClickAbleLabel(200, 100, 'Chose set', go_to_chose_set))
+        self.objects.append(ClickAbleLabel(200, 200, 'Create new set', go_to_create_new_set))
+        self.mode = 'Start'
+
+    def clicks(self, point):
+        for obj in self.objects:
+            mode = obj.click_on(point)
+            if mode:
+                self.mode = mode
+        return self.mode
+
+class CreateRandomSetScreen:
+    def __init__(self):
+        pass
+
+
 if __name__ == '__main__':
     run = True
     # Window = MainWindow([Person(pygame.transform.scale(pygame.image.load('data/Persons/Test_set/Герман_Болдырев.jpeg'), (200, 200)), 'GG')])
-    Window = FinalScreen(2, 16, ['gg', 'GG'])
+    # Window = FinalScreen()
+    # Window.update_data(2, 16, ['gg', 'GG'])
+    Window = MiddleScreen()
     while run:
         pygame.time.delay(1000 // 30)
         for el in pygame.event.get():
             if el.type == pygame.QUIT:
                 run = False
+            if el.type == pygame.MOUSEBUTTONDOWN:
+                Window.clicks(el.pos)
             # Window.update_input(el)
 
         Window.draw()

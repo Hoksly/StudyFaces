@@ -1,6 +1,7 @@
 import os
-
+import string
 import pygame
+from ImageFunctions import generate_new_set
 
 pygame.init()
 sep = '/'
@@ -272,7 +273,7 @@ class Text(Icon):
 
 
 class Label:
-    def __init__(self, text, x, y, width=200, height=50, text_size=32):
+    def __init__(self, text, x, y, width=200, height=50, text_size=32,align = 'center'):
         self.background = pygame.Rect((x, y), (width, height))
         self.font = self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', text_size)
         self.input = text
@@ -281,18 +282,31 @@ class Label:
         self.y = y
         self.width = width
         self.height = height
-
+        self.align = align
     def _render_text(self, text):
         return self.font.render(text, True, (255, 255, 255))
 
     def draw(self):
+        self.background.width = max(self.background.width, self.text.get_width() + 5)
         pygame.draw.rect(window, pygame.Color('lightblue'), self.background)
-        label_x = self.x + (self.width - self.text.get_width()) / 2
-        label_y = self.y + (self.height - self.text.get_height()) / 2
+        if self.align == 'center':
+            label_x = self.x + (self.width - self.text.get_width()) / 2
+            label_y = self.y + (self.height - self.text.get_height()) / 2
+
+        elif self.align == 'right':
+            label_x = self.x
+            label_y = self.y + (self.height - self.text.get_height()) / 2
+        else:
+            label_x = self.x
+            label_y = self.y
+
         window.blit(self.text, (label_x, label_y))
 
     def _collidepoint(self, point):
         return pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(point)
+
+    def update_input(self, event):
+        pass
 
 
 class ClickAbleLabel(Label):
@@ -346,9 +360,92 @@ class ChooseSetScreen(Screen):
         return self.mode
 
 
-class CreateNewSetScreen:
+class TextInput:
+    def __init__(self, x, y, width= 140, height = 32, mode='all', text_size = 32,):
+        self.user_text = ''
+        self.x = x
+        self.y = y
+        self.input_rect = pygame.Rect(x, y, width, height)
+        self.mode = mode
+        self.font = self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', text_size)
+
+    def update_input(self, event):
+        if event.type == pygame.KEYDOWN:
+
+            # Check for backspace
+            if event.key == pygame.K_BACKSPACE:
+
+                # get text input from 0 to -1 i.e. end.
+                self.user_text = self.user_text[:-1]
+            elif event.key != pygame.K_RETURN:
+                if self.mode == 'numbers':
+                    self.user_text += event.unicode if event.unicode in string.digits else ''
+                elif self.mode == 'letters':
+                    self.user_text += event.unicode if event.unicode in string.ascii_letters else ''
+                else:
+                    self.user_text += event.unicode
+
+    def return_value(self):
+        return self.user_text
+
+    def draw(self):
+        pygame.draw.rect(window, pygame.Color('lightblue'), self.input_rect)
+        text_surface = self.font.render(self.user_text, True,
+                                        (255, 255, 255))
+        window.blit(text_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
+        self.input_rect.w = max(100, text_surface.get_width() + 10)
+
+
+def create_new_set():
+    pass
+
+
+class CreateNewSetScreen(Screen):
     def __init__(self):
-        pass
+        super().__init__()
+        self.level = 1
+
+        self.objects.append(Label('Name of new set:', 100, 100, align='right', height= 32, text_size=30))
+        self.objects.append(TextInput(350, 100, height= 32, text_size=32))
+
+        self.objects.append(Label('Number of humans:', 100, 150, align='right', height= 32, text_size=30))
+        self.objects.append(TextInput(350, 150, height= 32, text_size=32))
+
+        self.objects.append(Label('Language (Eng, Rus):', 100, 200, align='right', height= 32, text_size=30))
+        self.objects.append(TextInput(350, 200, height= 32, text_size=32))
+
+        self.objects.append(Label('Age (beta):', 100, 250, align='right', height= 32, text_size=30))
+        self.objects.append(TextInput(350, 250, height= 32, text_size=32))
+
+        self.objects.append(Label('Gender (beta):', 100, 300, align='right', height= 32, text_size=30))
+        self.objects.append(TextInput(350, 300, height= 32, text_size=32))
+
+        self.objects.append(ClickAbleLabel(200, 350, 'Confirm', create_new_set))
+
+    def clicks(self, event):
+        print(self.level)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.objects[-1]._collidepoint(event.pos):
+                set_name = self.objects[1].return_value()
+                number_of_members = int(self.objects[3].return_value())
+                lang = self.objects[5].return_value()
+                age = self.objects[7].return_value() # beta
+                gender = self.objects[9].return_value() # beta
+
+                generate_new_set(set_name, number_of_members, language=lang)
+                #print('gg')
+        if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+
+            if event.key == pygame.K_UP:
+                print('up')
+                self.level -= 1 if self.level > 1 else 0
+            elif event.key == pygame.K_DOWN:
+                print('down')
+                self.level += 1 if self.level < 9 else 0
+            else:
+                self.objects[self.level].update_input(event)
+
+        return 'Create New Set'
 
 
 # Functions for MiddleScreen class
@@ -357,7 +454,7 @@ def go_to_chose_set():
 
 
 def go_to_create_new_set():
-    return "Chose Set"
+    return "Create New Set"
 
 
 class MiddleScreen(Screen):
@@ -386,14 +483,15 @@ if __name__ == '__main__':
     # Window = FinalScreen()
     # Window.update_data(2, 16, ['gg', 'GG'])
     # Window = MiddleScreen()
-    Window = ChooseSetScreen()
+    Window = CreateNewSetScreen()
     while run:
         pygame.time.delay(1000 // 30)
         for el in pygame.event.get():
             if el.type == pygame.QUIT:
                 run = False
+            Window.clicks(el)
             if el.type == pygame.MOUSEBUTTONDOWN:
-                print(Window.clicks(el.pos))
+                pass
             # Window.update_input(el)
 
         Window.draw()

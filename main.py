@@ -1,5 +1,5 @@
 from ImageFunctions import generate_new_set, take_photos_and_their_names_from_directory
-from GUI import Person, StartWindow, MainWindow, FinalScreen, MiddleScreen, ChooseSetScreen
+from GUI import Person, StartWindow, MainWindow, FinalScreen, MiddleScreen, ChooseSetScreen, CreateNewSetScreen
 from GUIFunctions import give_folder_name
 import pygame
 pygame.init()
@@ -28,6 +28,7 @@ W = StartWindow()
 Final_Score_Screen = FinalScreen()
 MiddleScreen = MiddleScreen()
 Chose_Screen = ChooseSetScreen()
+NewSetScreen = CreateNewSetScreen()
 run = True
 mode = 'Main'
 
@@ -39,6 +40,8 @@ if __name__ == '__main__':
         pygame.time.delay(1000 // 30)
 
         for el in pygame.event.get():
+            if mode == 'Create New Set':
+                NewSetScreen.clicks(el)
             if el.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = el.pos
                 if mode == 'Main':
@@ -52,7 +55,6 @@ if __name__ == '__main__':
                     if folder != 'Chose Set':
                         Main = MainWindow(create_persons_list('data/Persons/' + folder))
                         mode = 'In Game'
-
             if mode == 'In Game':
                 mode = Main.update_input(el)
 
@@ -69,6 +71,8 @@ if __name__ == '__main__':
 
         elif mode == 'Chose Set':
             Chose_Screen.draw()
+        elif mode == 'Create New Set':
+            NewSetScreen.draw()
 
         elif mode == 'Settings':
             pass # Switch to settings

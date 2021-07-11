@@ -4,7 +4,10 @@ import os
 import requests
 import random
 import string
+from time import sleep
+# from GUI import SEP as sep
 
+sep = '/'
 
 def __highlightface(net, frame, conf_threshold=0.7):
     frameOpencvDnn = frame.copy()
@@ -71,7 +74,7 @@ def take_gender_and_age(IMAGE):
         return gender, age[1:-1]
 
 
-sep = '/'  # need update, specified to os
+# need update, specified to os
 file_sep = '_'  # separator between name and second name
 
 # Russian names and second names
@@ -151,6 +154,7 @@ def put_some_photos_in_folder(folder_name, n, target_age=0, target_gender=0):
     _headers = {'User-Agent': 'Mozzila/5.0'}
 
     while n > 0:
+        sleep(1.5)
 
         photo = requests.get(_url, headers=_headers).content
         filename = folder_name + sep + generate_random_name(8)
@@ -169,7 +173,6 @@ def put_some_photos_in_folder(folder_name, n, target_age=0, target_gender=0):
                 destroy = True
             if target_gender != gender and target_gender != 0:
                 destroy = True
-            print(age, target_age, age == target_age)
             if destroy:
                 os.remove(filename)
             else:
@@ -216,8 +219,10 @@ def give_names_to_photos_in_folder(folder, difficult='hard', language='russian',
         os.rename(folder + sep + photo, folder + sep + new_filename + '.jpeg')
 
 
-def generate_new_set(set_name, n, mode='new', difficult='hard', language='rus'):
+def generate_new_set(set_name, n, mode='new', difficult='hard', language='rus', age = 0, gender = 0):
     """
+    :param gender: gender of new set (beta)
+    :param age: target age for new set (beta)
     :param difficult: difficulty of new set
     :param language: language of set, can be 'rus' or 'eng'
     :param mode: new set or for addition. Can take values 'new' or 'addition'
@@ -230,13 +235,29 @@ def generate_new_set(set_name, n, mode='new', difficult='hard', language='rus'):
 
     """
     folder = Photo_dir + sep + set_name
+    destroy = False
     try:
         os.mkdir(folder)
+
     except:
         pass
 
-    put_some_photos_in_folder(folder, n, target_age=0, target_gender=0)
-    give_names_to_photos_in_folder(folder, mode='all' if mode == 'new' else 'addition', language=language,
-                                   difficult=difficult)
+    try:
+        put_some_photos_in_folder(folder, n, target_age=age, target_gender=gender)
+    except:
+        destroy = True
+        print('Error in put_some_photos_in_folder, line 246 ImageFunctions.py')
 
-    return None
+    try:
+        give_names_to_photos_in_folder(folder, mode='all' if mode == 'new' else 'addition', language=language,
+                                       difficult=difficult)
+    except:
+        print('Error in give_names_to_photos_in_folder, line 251 ImageFunctions.py')
+        destroy = True
+
+    if destroy:
+        os.rmdir(folder)
+        assert (ValueError('Something goes wrong, please, report this bug: https://github.com/hoksly/StudyFaces'))
+        return False
+
+    return True

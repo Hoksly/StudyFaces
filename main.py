@@ -41,7 +41,9 @@ if __name__ == '__main__':
 
         for el in pygame.event.get():
             if mode == 'Create New Set':
-                NewSetScreen.clicks(el)
+                mode = NewSetScreen.clicks(el)
+                if NewSetScreen.finished:
+                    Chose_Screen = ChooseSetScreen()
             if el.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = el.pos
                 if mode == 'Main':

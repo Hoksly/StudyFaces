@@ -2,6 +2,8 @@ import os
 import string
 import pygame
 from ImageFunctions import generate_new_set
+from GUIFunctions import check_input
+from time import sleep
 
 pygame.init()
 sep = '/'
@@ -273,18 +275,22 @@ class Text(Icon):
 
 
 class Label:
-    def __init__(self, text, x, y, width=200, height=50, text_size=32,align = 'center'):
+    def __init__(self, text, x, y, width=200, height=50, text_size=32, align='center', color=(255, 255, 255)):
         self.background = pygame.Rect((x, y), (width, height))
         self.font = self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', text_size)
         self.input = text
-        self.text = self._render_text(text)
+        self.color = color
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.align = align
+
+        self.text = self._render_text(text)
+
+
     def _render_text(self, text):
-        return self.font.render(text, True, (255, 255, 255))
+        return self.font.render(text, True, self.color)
 
     def draw(self):
         self.background.width = max(self.background.width, self.text.get_width() + 5)
@@ -336,20 +342,24 @@ class Screen:
             obj.draw()
 
 
+'''
+# Not in usage, for now
 def give_folder_name(name):
     return name
+'''
 
 
 class ChooseSetScreen(Screen):
     def __init__(self, set_folder='data/Persons'):
         super().__init__()
+        self.set_folder = set_folder
         self.all_sets = os.listdir(set_folder)
         self.mode = 'Chose Set'
         x = 200
         y = 0
         for folder in self.all_sets:
             self.objects.append(ClickAbleLabel(x, y, folder, None, 30, height=30))
-            y += 30
+            y += 35
 
     def clicks(self, point):
         for obj in self.objects:
@@ -359,15 +369,19 @@ class ChooseSetScreen(Screen):
 
         return self.mode
 
+    def draw(self):
+        super().draw()
+
 
 class TextInput:
-    def __init__(self, x, y, width= 140, height = 32, mode='all', text_size = 32,):
+    def __init__(self, x, y, width=140, height=32, mode='all', text_size=32, color=(255, 255, 255)):
         self.user_text = ''
         self.x = x
         self.y = y
         self.input_rect = pygame.Rect(x, y, width, height)
         self.mode = mode
         self.font = self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', text_size)
+        self.color = color
 
     def update_input(self, event):
         if event.type == pygame.KEYDOWN:
@@ -391,7 +405,7 @@ class TextInput:
     def draw(self):
         pygame.draw.rect(window, pygame.Color('lightblue'), self.input_rect)
         text_surface = self.font.render(self.user_text, True,
-                                        (255, 255, 255))
+                                        self.color)
         window.blit(text_surface, (self.input_rect.x + 5, self.input_rect.y + 5))
         self.input_rect.w = max(100, text_surface.get_width() + 10)
 
@@ -405,47 +419,61 @@ class CreateNewSetScreen(Screen):
         super().__init__()
         self.level = 1
 
-        self.objects.append(Label('Name of new set:', 100, 100, align='right', height= 32, text_size=30))
-        self.objects.append(TextInput(350, 100, height= 32, text_size=32))
+        self.objects.append(Label('Name of new set:', 100, 100, align='right', height=32, text_size=30))
+        self.objects.append(TextInput(350, 100, height=32, text_size=32))
 
-        self.objects.append(Label('Number of humans:', 100, 150, align='right', height= 32, text_size=30))
-        self.objects.append(TextInput(350, 150, height= 32, text_size=32))
+        self.objects.append(Label('Number of humans:', 100, 150, align='right', height=32, text_size=30))
+        self.objects.append(TextInput(350, 150, height=32, text_size=32))
 
-        self.objects.append(Label('Language (Eng, Rus):', 100, 200, align='right', height= 32, text_size=30))
-        self.objects.append(TextInput(350, 200, height= 32, text_size=32))
+        self.objects.append(Label('Language (Eng, Rus):', 100, 200, align='right', height=32, text_size=30))
+        self.objects.append(TextInput(350, 200, height=32, text_size=32))
 
-        self.objects.append(Label('Age (beta):', 100, 250, align='right', height= 32, text_size=30))
-        self.objects.append(TextInput(350, 250, height= 32, text_size=32))
+        self.objects.append(Label('Age (beta):', 100, 250, align='right', height=32, text_size=30))
+        self.objects.append(TextInput(350, 250, height=32, text_size=32))
 
-        self.objects.append(Label('Gender (beta):', 100, 300, align='right', height= 32, text_size=30))
-        self.objects.append(TextInput(350, 300, height= 32, text_size=32))
+        self.objects.append(Label('Gender (beta):', 100, 300, align='right', height=32, text_size=30))
+        self.objects.append(TextInput(350, 300, height=32, text_size=32))
 
         self.objects.append(ClickAbleLabel(200, 350, 'Confirm', create_new_set))
 
+        self.run = True
+        self.finished = False
+
+    """
+    Neds to be upgraded, when input is incorrect. Faced bug with same photos, about 3-4 same photos in one dir 
+    (solved with time.sleep).
+    """
+
     def clicks(self, event):
-        print(self.level)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.objects[-1]._collidepoint(event.pos):
                 set_name = self.objects[1].return_value()
-                number_of_members = int(self.objects[3].return_value())
-                lang = self.objects[5].return_value()
-                age = self.objects[7].return_value() # beta
-                gender = self.objects[9].return_value() # beta
+                number_of_members = self.objects[3].return_value() if self.objects[3].return_value() != '' else 10
+                lang = self.objects[5].return_value() if self.objects[5].return_value() != '' else 'rus'
+                age = self.objects[7].return_value() if self.objects[7].return_value() != '' else 0  # beta
+                gender = self.objects[9].return_value() if self.objects[9].return_value() != '' else 0  # beta
 
-                generate_new_set(set_name, number_of_members, language=lang)
-                #print('gg')
+                right, res = check_input(set_name, number_of_members, lang, age, gender)
+                self.run = True
+                for i in range(5):
+                    if not right[i]:
+                        self.objects[1 + i*2].color = (255, 0, 0)
+                        self.run = False
+
+                if self.run:
+                    print(set_name, number_of_members, lang, age, gender)
+                    self.finished = generate_new_set(set_name, int(number_of_members), language=lang, age=age, gender=gender)
+
         if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
 
             if event.key == pygame.K_UP:
-                print('up')
                 self.level -= 1 if self.level > 1 else 0
             elif event.key == pygame.K_DOWN:
-                print('down')
                 self.level += 1 if self.level < 9 else 0
             else:
                 self.objects[self.level].update_input(event)
 
-        return 'Create New Set'
+        return 'Create New Set' if not self.finished else 'Chose Set'
 
 
 # Functions for MiddleScreen class

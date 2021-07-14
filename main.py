@@ -7,7 +7,6 @@ pygame.init()
 window = pygame.display.set_mode((600, 400))
 
 
-
 def create_persons_list(folder):
     """
 
@@ -36,7 +35,7 @@ if __name__ == '__main__':
     run = True
 
     while run:
-        #print(mode)
+        # print(mode)
         pygame.time.delay(1000 // 30)
 
         for el in pygame.event.get():
@@ -57,6 +56,9 @@ if __name__ == '__main__':
                     if folder != 'Chose Set':
                         Main = MainWindow(create_persons_list('data/Persons/' + folder))
                         mode = 'In Game'
+                elif mode == 'Finish':
+                    mode = Final_Score_Screen.collidepoint(el.pos)
+
             if mode == 'In Game':
                 mode = Main.update_input(el)
 

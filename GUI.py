@@ -11,6 +11,8 @@ data_folder = 'data' + sep + 'GUI' + sep
 
 window = pygame.display.set_mode((600, 400))
 
+mode = 'Main'
+
 '''
 class MainWindow:
     def __init__(self, width, height, background = data_folder + sep +'background.png' ):
@@ -175,7 +177,7 @@ class MainWindow:
 
 
                     else:
-                        print('here')
+                        # print('here')
                         return 'Finish'
 
             else:
@@ -215,6 +217,9 @@ class FinalScreen:
         self.background = pygame.image.load(bg_image)
         self.font = pygame.font.SysFont(data_folder + 'ChelseaMarket-Regular.ttf', 32)
 
+        self.exit_label = ClickAbleLabel(0, 350, 'Exit', None, width=130)
+        self.return_label = ClickAbleLabel(470, 350, 'Retake', None, width=130)
+
     def update_data(self, score, all_score, failed):
         """
         Need to be initialize a bit later
@@ -249,6 +254,19 @@ class FinalScreen:
         for text in failed_answers_text:
             window.blit(text, (300 - text.get_width() / 2, y))
             y += text.get_height()
+
+        self.return_label.draw()
+        self.exit_label.draw()
+
+    def collidepoint(self, point):
+        res1 = self.exit_label.click_on(point)
+        res2 = self.return_label.click_on(point)
+        print(res1, res2)
+        if res1:
+            return 'Exit'
+        if res2:
+            return 'Chose Set'
+        return 'Finish'
 
 
 class Object:
@@ -461,7 +479,7 @@ class CreateNewSetScreen(Screen):
                         self.run = False
 
                 if self.run:
-                    print(set_name, number_of_members, lang, age, gender)
+                    # print(set_name, number_of_members, lang, age, gender)
                     self.finished = generate_new_set(set_name, int(number_of_members), language=lang, age=age, gender=gender)
 
         if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:

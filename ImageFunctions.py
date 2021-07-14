@@ -83,6 +83,11 @@ Russian_female_names_hard_file = 'data' + sep + 'Names' + sep + 'Russian' + sep 
 Russian_male_second_names_hard_file = 'data' + sep + 'Names' + sep + 'Russian' + sep + 'Russian_second_names_male_hard.txt'
 Russian_female_second_names_hard_file = 'data' + sep + 'Names' + sep + 'Russian' + sep + 'Russian_second_names_female_hard.txt'
 
+English_male_names_hard_file = 'data' + sep + 'Names' + sep + 'Eng' + sep + 'Eng_names_male_hard.txt'
+English_female_names_hard_file = 'data' + sep + 'Names' + sep + 'Eng' + sep + 'Eng_names_female_hard.txt'
+English_male_second_names_hard_file = 'data' + sep + 'Names' + sep + 'Eng' + sep + 'last_names.txt'
+English_female_second_names_hard_file = 'data' + sep + 'Names' + sep + 'Eng' + sep + 'last_names.txt'
+
 # Photos directory
 Photo_dir = 'data/Persons'
 
@@ -179,7 +184,7 @@ def put_some_photos_in_folder(folder_name, n, target_age=0, target_gender=0):
                 n -= 1
 
 
-def give_names_to_photos_in_folder(folder, difficult='hard', language='russian', mode='all'):
+def give_names_to_photos_in_folder(folder, difficult='hard', language='rus', mode='all'):
     """
     Uses function recognize_sex to recognize sex, and after that gives a
     random name and second name to a photo.
@@ -204,6 +209,12 @@ def give_names_to_photos_in_folder(folder, difficult='hard', language='russian',
         male_second_names = take_text_data_from_file(Russian_male_second_names_hard_file)
         female_names = take_text_data_from_file(Russian_female_names_hard_file)
         female_second_names = take_text_data_from_file(Russian_female_second_names_hard_file)
+
+    elif difficult == 'hard' and language == 'eng':
+        male_names = take_text_data_from_file(English_male_names_hard_file)
+        male_second_names = take_text_data_from_file(English_male_second_names_hard_file)
+        female_names = take_text_data_from_file(English_female_names_hard_file)
+        female_second_names = take_text_data_from_file(English_female_second_names_hard_file)
 
     for photo in os.listdir(folder) if mode == 'all' else NEW_FILES:
         gender, age = take_gender_and_age(folder + sep + photo) if mode == 'all' else take_gender_and_age(photo)
